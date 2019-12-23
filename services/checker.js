@@ -1,8 +1,9 @@
 const CopyleaksCloud = require('plagiarism-checker');
 const clCloud = new CopyleaksCloud();
 const config = clCloud.getConfig();
-const email = 'damiz.kibb@gmail.com';
-const apiKey = 'A7D55EBC-CD57-4E87-BD59-36BC205D7B29';
+const keys = require('../config/keys')
+const email = keys.checkerEmail;
+const apiKey = keys.checkerAccess;
 const Assignment = require('../models/Assignment')
 const createFiles = (files, callback) => {
     clCloud.login(email,apiKey,config.E_PRODUCT.Education, (res, loginError) => {
