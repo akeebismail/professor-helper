@@ -7,11 +7,23 @@ const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middlewares/auth')
 const secret = require('../config/keys').loginSecret
+
+
+const obj = user => {
+   return {
+       id: user.id,
+       name: user.name,
+       username: user.username,
+       email: user.email,
+       createdAt: user.createdAt
+   }
+};
 /**
  *  @method - POST
  *  @param - /signup
  *  @description - Professor sign up
  */
+
 
 router.post("/signup",
     [
@@ -50,9 +62,11 @@ router.post("/signup",
             expiresIn: 100000
         }, (err, token) => {
             if (err) throw err;
-            res.status(200).json({message: "Account created successfully",
+            delete  user.password;
+            res.status(200).json(
+                {message: "Account created successfully",
                 token,
-                user
+                user: obj(user)
             })
         })
     }catch (error) {
@@ -101,7 +115,7 @@ router.post('/login',
             if (err) throw err;
             res.status(200).json({
                 message: "Login Successfully",
-                token, user
+                token, user: obj(user)
             })
         })
     }catch (e) {
@@ -122,7 +136,7 @@ router.get('/me',auth, async (req, res)=> {
         const user = await User.findById(req.user.id);
         res.status(200).json({
             message: "Professor profile",
-            user
+            user: obj(user)
         });
     } catch (e) {
         res.send('Error fetching user')
