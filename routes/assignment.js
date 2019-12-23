@@ -45,11 +45,25 @@ router.post('/assignment', [
             await assignment.save();
             res.status(200).json(assignment)
         }catch (e) {
-
             console.log(e)
             res.status(500).send(e.message)
         }
 
+});
+
+router.put('/compare/:first/:second',
+    [
+        auth
+    ],
+    async (req, res)=> {
+    //get the first student record
+        let firstStudent = await Assignment.findById(req.params.first);
+        let secondStudent = await Assignment.findById(req.params.second);
+        //process comparison
+
+    res.status(200).json({
+        firstStudent, secondStudent
+    })
 })
 
 module.exports = router;
