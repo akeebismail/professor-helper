@@ -71,17 +71,37 @@ router.put('/compare/:first/:second',
             });
         })
         //  check result
-        console.log(firstStudent.id)
         let pid = await Assignment.findById(firstStudent.id);
-
-        await checker.checkResults(pid.processId,(res, error) => {
-           res.forEach(async (item) => {
-               await pid.updateOne(item);
-           });
+        await checker.checkResults(pid.processId, (res, error) => {
+            res.forEach(async (item) => {
+                pid.compareResult = item;
+                await pid.save();
+            })
         });
-
+        let s_pid = await Assignment.findById(secondStudent.id);
+        await checker.checkResults(s_pid.processId,  (res, error) => {
+            res.forEach(async (item) => {
+                console.log('second', item)
+                s_pid.compareResult = item;
+                await s_pid.save();
+            })
+        });
     res.status(200).json({
-        firstStudent, secondStudent
+        firstStudent: {
+            id: firstStudent.id,
+            student: firstStudent.student_id,
+            filename: firstStudent.filename,
+            percents: firstStudent.compareResult.Percents,
+            copiedWords: firstStudent.compareResult.NumberOfCopiedWords,
+            title: firstStudent.compareResult.title
+        }, secondStudent: {
+            id: firstStudent.id,
+            student: secondStudent.student_id,
+            filename: secondStudent.filename,
+            percents: secondStudent.compareResult.Percents,
+            copiedWords: secondStudent.compareResult.NumberOfCopiedWords,
+            title: secondStudent.compareResult.title
+        }
     });
 })
 

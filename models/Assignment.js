@@ -18,7 +18,7 @@ const Assignment = mongoose.Schema({
         required: false
     },
     compareResult: {
-        type: String,
+        type: Object,
         required: false
     }
 });
