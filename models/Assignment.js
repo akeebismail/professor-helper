@@ -8,6 +8,18 @@ const Assignment = mongoose.Schema({
     assignment: {
         type: String,
         required: true
+    },
+    filename: {
+        type: String,
+        required: false
+    },
+    processId: {
+        type: String,
+        required: false
+    },
+    compareResult: {
+        type: String,
+        required: false
     }
 });
 

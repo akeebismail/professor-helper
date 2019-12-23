@@ -6,6 +6,7 @@ const Student = require('../models/Student')
 const Assignment = require('../models/Assignment')
 const router = express.Router();
 const multer = require('multer');
+const checker = require('../services/checker')
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'data')
@@ -40,6 +41,7 @@ router.post('/assignment', [
             //add assignment
             let assignment = new Assignment({
                 student_id : s_account.id,
+                filename: req.file.filename,
                 assignment: req.file.path
             })
             await assignment.save();
@@ -60,10 +62,27 @@ router.put('/compare/:first/:second',
         let firstStudent = await Assignment.findById(req.params.first);
         let secondStudent = await Assignment.findById(req.params.second);
         //process comparison
+         await checker.createFiles([firstStudent.assignment, secondStudent.assignment], (res, err) => {
+            //console.log(res)
+             //Save update process Id
+            res.Success.forEach(async (item) => {
+               let assign =  await Assignment.findOne({filename: item.Filename})
+                await assign.updateOne({processId: item.ProcessId})
+            });
+        })
+        //  check result
+        console.log(firstStudent.id)
+        let pid = await Assignment.findById(firstStudent.id);
+
+        await checker.checkResults(pid.processId,(res, error) => {
+           res.forEach(async (item) => {
+               await pid.updateOne(item);
+           });
+        });
 
     res.status(200).json({
         firstStudent, secondStudent
-    })
+    });
 })
 
 module.exports = router;
