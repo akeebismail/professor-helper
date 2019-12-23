@@ -6,6 +6,7 @@ const router = express.Router();
 
 const User = require('../models/User');
 const auth = require('../middlewares/auth')
+const secret = require('../config/keys').loginSecret
 /**
  *  @method - POST
  *  @param - /signup
@@ -45,11 +46,14 @@ router.post("/signup",
                 id: user.id
             }
         };
-        jwt.sign(payload, 'abcde', {
+        jwt.sign(payload, secret, {
             expiresIn: 100000
         }, (err, token) => {
             if (err) throw err;
-            res.status(200).json({token, user})
+            res.status(200).json({message: "Account created successfully",
+                token,
+                user
+            })
         })
     }catch (error) {
         console.log(error.message)
@@ -93,9 +97,10 @@ router.post('/login',
                 id: user.id
             }
         }
-        jwt.sign(payload, 'abcde',{expiresIn: 10000}, (err, token) => {
+        jwt.sign(payload, secret,{expiresIn: 10000}, (err, token) => {
             if (err) throw err;
             res.status(200).json({
+                message: "Login Successfully",
                 token, user
             })
         })
@@ -115,10 +120,28 @@ router.post('/login',
 router.get('/me',auth, async (req, res)=> {
     try{
         const user = await User.findById(req.user.id);
-        res.status(200).json(user);
+        res.status(200).json({
+            message: "Professor profile",
+            user
+        });
     } catch (e) {
         res.send('Error fetching user')
     }
-})
+});
+
+router.get('/logout', auth, async (req, res) => {
+    const token = req.header("token");
+    try{
+        const decoded = jwt.verify(token, secret, (error, decoded) => {
+            decoded.exp - parseInt(new Date().getTime()/1000)
+        });
+        res.status(200).json({
+            message: 'Logout successfully'
+        })
+    }catch (e) {
+        console.log('Auth middleware error', e)
+        res.status(500).send({message: 'Invalid token', error: e.message})
+    }
+});
 
 module.exports = router;

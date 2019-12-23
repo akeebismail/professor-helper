@@ -45,7 +45,11 @@ router.post('/assignment', [
                 assignment: req.file.path
             })
             await assignment.save();
-            res.status(200).json(assignment)
+            res.status(200).json({
+                message: "Assigment submitted successfully.",
+                assignment
+
+            })
         }catch (e) {
             console.log(e)
             res.status(500).send(e.message)
@@ -87,6 +91,7 @@ router.put('/compare/:first/:second',
             })
         });
     res.status(200).json({
+        message: "Comparison completed successfully.",
         firstStudent: {
             id: firstStudent.id,
             student: firstStudent.student_id,
@@ -102,6 +107,37 @@ router.put('/compare/:first/:second',
             copiedWords: secondStudent.compareResult.NumberOfCopiedWords,
             title: secondStudent.compareResult.title
         }
+    });
+});
+
+
+router.get('/history',[auth],async (req, res) => {
+    const assignments = await Assignment.find({})
+    console.log(assignments);
+    res.status(200).json(
+        {
+            message: "Past compared assignments",
+            assignments: assignments.map((assignment) => {
+                return {
+                    id: assignment.id,
+                    student: assignment.student_id,
+                    filename: assignment.filename
+                }})
+        }
+        );
+});
+
+router.get('/assignment/:id', auth, async (req, res) => {
+    let id = req.params.id;
+    let assignment = await Assignment.findById(id);
+    if (!assignment){
+        return  res.status(404).json({
+            message: "No assignment found."
+        });
+    }
+    res.status(200).json({
+        message : "Assignment details.",
+        assignment
     });
 })
 
