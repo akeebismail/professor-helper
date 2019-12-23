@@ -32,7 +32,7 @@ router.post("/signup",
 
         let user = await User.findOne({email});
         if (user) {
-            return res.status(400).json({message: 'User already exists.'})
+            return res.status(422).json({message: 'User already exists.'})
         }
         user = new User({
             username, name, email, password
@@ -71,7 +71,7 @@ router.post('/login',
     async (req, res)=> {
     const errors = validationResult(req);
     if (!errors.isEmpty()){
-        return res.status(400).json({
+        return res.status(422).json({
             errors: errors.array()
         })
     }
@@ -115,7 +115,7 @@ router.post('/login',
 router.get('/me',auth, async (req, res)=> {
     try{
         const user = await User.findById(req.user.id);
-        res.json(user);
+        res.status(200).json(user);
     } catch (e) {
         res.send('Error fetching user')
     }
